@@ -76,12 +76,8 @@ fn second(allocator: std.mem.Allocator, lines: [][]const u8) !i32 {
     defer counter.deinit();
     for (col_2.items) |i| {
         const count = counter.get(i) orelse 0;
-        // std.debug.print("i {d} count: {d}\n", .{i, count});
         try counter.put(i, count + 1);
     }
-
-    std.mem.sort(i32, col_1.items, {}, comptime std.sort.asc(i32));
-    std.mem.sort(i32, col_2.items, {}, comptime std.sort.asc(i32));
 
     var total: i32 = 0;
     for (col_1.items) |i| {
