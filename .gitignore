@@ -1,0 +1,4 @@
+.idea/
+zig
+*.o
+input.txt
