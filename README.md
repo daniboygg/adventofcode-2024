@@ -11,6 +11,6 @@ On every folder create input.txt with problem data and execute:
 * compare time executions:
     1. Install https://github.com/sharkdp/hyperfine
     2. compile zig with `zig build-exe main.zig -femit-bin=zig -O ReleaseSafe`
-    3. execute `hyperfine "python main.py" "./zig" --export-markdown times.md`
+    3. execute `hyperfine "./zig" "python main.py" --export-markdown times.md`
 
 You can generate the structure of a new day with the util script `python create_day <number_of_day>`
