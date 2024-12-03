@@ -45,7 +45,7 @@ fn first(_: std.mem.Allocator, lines: [][]const u8) !i32 {
             is_valid = false;
 
             const number = try std.fmt.parseInt(i32, next, 10);
-            const diff = last_number - number;
+            const diff = number - last_number;
             if (last_diff != 0) {
                 if (last_diff > 0 and diff < 0) {
                     break;
@@ -69,28 +69,39 @@ fn first(_: std.mem.Allocator, lines: [][]const u8) !i32 {
     return total;
 }
 
-fn second(allocator: std.mem.Allocator, lines: [][]const u8) !i32 {
+fn second(_: std.mem.Allocator, lines: [][]const u8) !i32 {
     var total: i32 = 0;
+    const BUFFER_SIZE = 20;
     for (lines) |line| {
-        var numbers = std.ArrayList(i32).init(allocator);
-        defer numbers.deinit();
+        var buffer: [BUFFER_SIZE]i32 = undefined;
+        var count: usize = 0;
 
         var iter = std.mem.split(u8, line, " ");
         while (iter.next()) |next| {
             const n = try std.fmt.parseInt(i32, next, 10);
-            try numbers.append(n);
+            buffer[count] = n;
+            count += 1;
         }
+        const buffer_slice = buffer[0..count];
 
-        if (isValidLine(numbers.items)) {
+        if (isValidLine(buffer_slice)) {
             total += 1;
             continue;
         }
 
-        for (0..numbers.items.len) |index| {
-            var copy_numbers = try numbers.clone();
-            defer copy_numbers.deinit();
-            _ = copy_numbers.orderedRemove(index);
-            if (isValidLine(copy_numbers.items)) {
+        var subset_buffer: [BUFFER_SIZE]i32 = undefined;
+        for (0..buffer_slice.len) |skip_index| {
+            var count_subset: usize = 0;
+            for (buffer_slice, 0..) |value, i| {
+                if (i == skip_index) {
+                    continue;
+                }
+                subset_buffer[count_subset] = value;
+                count_subset += 1;
+            }
+            const subset_slice = subset_buffer[0..count_subset];
+
+            if (isValidLine(subset_slice)) {
                 total += 1;
                 break;
             }
