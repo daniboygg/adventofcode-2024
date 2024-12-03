@@ -1,5 +1,5 @@
 First iteration made in zig with allocators show worse relative performance as the first day.
-This iteration is made in <commit>.
+This iteration is made in commit a223fac8b232b05992c565f65d0f2afeb567b2b0.
 
 | Command          |    Mean [ms] | Min [ms] | Max [ms] |    Relative |
 |:-----------------|-------------:|---------:|---------:|------------:|
