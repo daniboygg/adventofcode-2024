@@ -54,6 +54,46 @@ fn first(_: std.mem.Allocator, lines: [][]const u8) !i32 {
     return total;
 }
 
+fn second(_: std.mem.Allocator, lines: [][]const u8) !i32 {
+    var total: i32 = 0;
+    var enabled = true;
+    for (lines) |line| {
+        var pos: usize = 0;
+        while (pos < line.len) {
+            const dont_pos = std.mem.indexOfPos(u8, line, pos, "don't()") orelse line.len;
+            const do_pos = std.mem.indexOfPos(u8, line, pos, "do()") orelse line.len;
+            const mul_pos = std.mem.indexOfPos(u8, line, pos, "mul(") orelse line.len;
+
+            const min = @min(dont_pos, @min(do_pos, mul_pos));
+            if (dont_pos == min) {
+                pos = dont_pos;
+                enabled = false;
+                pos += "don't()".len;
+                continue;
+            }
+            if (do_pos == min) {
+                pos = do_pos;
+                enabled = true;
+                pos += "do()".len;
+                continue;
+            }
+            if (enabled and mul_pos == min) {
+                pos = mul_pos;
+                if (getNumbers(line, pos + "mul(".len)) |result| {
+                    total += result.first * result.second;
+                    pos = result.pos;
+                    continue;
+                }
+                pos += "mul(".len;
+                continue;
+            }
+
+            pos += 1;
+        }
+    }
+    return total;
+}
+
 fn getNumbers(line: []const u8, start: usize) ?struct { first: i32, second: i32, pos: usize } {
     var last_position = std.mem.indexOfPos(u8, line, start, ",") orelse return null;
     var number_str = line[start..last_position];
@@ -72,118 +112,3 @@ fn getNumbers(line: []const u8, start: usize) ?struct { first: i32, second: i32,
 
     return .{ .first = f, .second = s, .pos = last_position + 1 };
 }
-
-fn second(_: std.mem.Allocator, lines: [][]const u8) !i32 {
-    var total: i32 = 0;
-    for (lines) |line| {
-        var found = lookFirstOfPos(line, 0);
-        var is_valid = true;
-        while (found) |value| {
-            // std.debug.print("{d}\n", .{value.pos});
-            var new_pos: usize = undefined;
-            switch (value.value) {
-                .mult => {
-                    if (is_valid) {
-                        if (getNumbers(line, value.pos + SearchType.mult.str().len)) |numbers| {
-                            total += numbers.first * numbers.second;
-                            // std.debug.print("{}\n", .{numbers});
-                            new_pos = numbers.pos;
-                        } else {
-                            new_pos = value.pos + 1;
-                        }
-                    } else {
-                        new_pos = value.pos + 1;
-                    }
-                },
-                .do => {
-                    is_valid = true;
-                    // std.debug.print("{}\n", .{is_valid});
-                    new_pos = value.pos;
-                },
-                .do_not => {
-                    is_valid = false;
-                    //                     std.debug.print("{}\n", .{is_valid});
-                    new_pos = value.pos;
-                },
-            }
-
-            // for (line) |l| {
-            //     std.debug.print("{c:>3}", .{l});
-            // }
-            // std.debug.print("\n", .{});
-            // for (0..line.len) |i| {
-            //     std.debug.print("{d:>3}", .{i});
-            // }
-            // std.debug.print("\n", .{});
-            // std.debug.print("{d}\n", .{new_pos});
-
-            found = lookFirstOfPos(line, new_pos);
-        }
-    }
-    return total;
-}
-
-fn lookFirstOfPos(line: []const u8, start: usize) ?struct { value: SearchType, pos: usize } {
-    const x = std.mem.indexOfPos(
-        u8,
-        line,
-        start,
-        SearchType.mult.str(),
-    ) orelse line.len - 1;
-    const y = std.mem.indexOfPos(
-        u8,
-        line,
-        start,
-        SearchType.do_not.str(),
-    ) orelse line.len - 1;
-    const z = std.mem.indexOfPos(
-        u8,
-        line,
-        start,
-        SearchType.do.str(),
-    ) orelse line.len - 1;
-
-    const m = @min(x, @min(y, z));
-    if (m == line.len - 1) {
-        return null;
-    }
-    std.debug.print("{d} {d} {d} min {d}\n", .{ x, y, z, m });
-
-    if (x == m) {
-        return .{ .value = .mult, .pos = x };
-    }
-    if (y == m) { // do an don't overlap so can start at same position
-        return .{ .value = .do_not, .pos = y + SearchType.do_not.str().len + 1 };
-    }
-    if (z == m) {
-        return .{ .value = .do, .pos = z + SearchType.do.str().len + 1 };
-    }
-
-    return null;
-
-    // if (x < y and x < z) {
-    //     return .{ .value = .mult, .pos = x };
-    // }
-    // if (y < x and y < z) { // do an don't overlap so can start at same position
-    //     return .{ .value = .do_not, .pos = y + SearchType.do_not.str().len };
-    // }
-    // if (z < x and z < y) {
-    //     return .{ .value = .do, .pos = z + SearchType.do.str().len };
-    // }
-
-    // return null;
-}
-
-const SearchType = enum {
-    mult,
-    do,
-    do_not,
-
-    pub fn str(self: SearchType) []const u8 {
-        return switch (self) {
-            .mult => "mul(",
-            .do => "do()",
-            .do_not => "don't()",
-        };
-    }
-};
