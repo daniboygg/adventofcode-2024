@@ -37,36 +37,36 @@ fn first(_: std.mem.Allocator, lines: [][]const u8) !i32 {
     var total: i32 = 0;
     for (lines) |line| {
         const search = "mul(";
-        for (0..line.len - search.len - 1) |i| {
-            const slice = line[i .. i + search.len];
-            if (std.mem.eql(u8, slice, search)) {
-                const number_position1 = get_next_number(
-                    line,
-                    i + search.len,
-                    ',',
-                ) catch continue;
-                const number_position2 = get_next_number(
-                    line,
-                    number_position1.next_position + 1,
-                    ')',
-                ) catch continue;
 
-                total += number_position1.number * number_position2.number;
-            }
+        var mult_pos = std.mem.indexOfPos(u8, line, 0, search);
+        while (mult_pos) |value| {
+            const new_start = value + search.len;
+            const number_position1 = getNextNumber(line, new_start, ',') catch {
+                mult_pos = std.mem.indexOfPos(u8, line, new_start, search);
+                continue;
+            };
+            const number_position2 = getNextNumber(line, number_position1.last_position , ')') catch {
+                mult_pos = std.mem.indexOfPos(u8, line, new_start, search);
+                continue;
+            };
+
+            total += number_position1.number * number_position2.number;
+
+            mult_pos = std.mem.indexOfPos(u8, line, new_start, search);
         }
     }
     return total;
 }
 
-fn get_next_number(line: []const u8, start: usize, until: u8) !struct { number: i32, next_position: usize } {
-    const next_position = get_next_position(line, start, until);
-    const number_str1 = line[start..next_position];
+fn getNextNumber(line: []const u8, start: usize, until: u8) !struct { number: i32, last_position: usize } {
+    const last_position = getNextPosition(line, start, until);
+    const number_str1 = line[start..last_position];
     // std.debug.print("number str {s}\n", .{number_str1});
     const number = try std.fmt.parseInt(i32, number_str1, 10);
-    return .{ .number = number, .next_position = next_position };
+    return .{ .number = number, .last_position = last_position + 1 };
 }
 
-fn get_next_position(line: []const u8, start: usize, char: u8) usize {
+fn getNextPosition(line: []const u8, start: usize, char: u8) usize {
     var position = start;
     while (line[position] != char) {
         position += 1;
