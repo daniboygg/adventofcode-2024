@@ -80,10 +80,15 @@ def extract_rules(lines: list[str]):
 def comparator(x, y, rules: list[Rule]):
     try:
         next(rule for rule in rules if rule.before == x and rule.after == y)
+        return -1
+    except StopIteration:
+        pass
+
+    try:
+        next(rule for rule in rules if rule.before == y and rule.after == x)
+        return 1
     except StopIteration:
         return 0
-
-    return -1
 
 
 if __name__ == '__main__':
