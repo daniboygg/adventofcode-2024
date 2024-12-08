@@ -1,6 +1,8 @@
 const std = @import("std");
 
 pub fn main() !void {
+    // according to documentation https://ziglang.org/documentation/0.13.0/#Choosing-an-Allocator
+    // change the allocator to this makes more sense
     var arena = std.heap.ArenaAllocator.init(std.heap.page_allocator);
     defer arena.deinit();
     const allocator = arena.allocator();

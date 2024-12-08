@@ -1,17 +1,9 @@
 const std = @import("std");
 
 pub fn main() !void {
-    var gpa = std.heap.GeneralPurposeAllocator(.{}){};
-    const allocator = gpa.allocator();
-    defer {
-        const check = gpa.deinit();
-        switch (check) {
-            .leak => {
-                std.debug.print("Memory leak detected!\n", .{});
-            },
-            .ok => {},
-        }
-    }
+    var arena = std.heap.ArenaAllocator.init(std.heap.page_allocator);
+    defer arena.deinit();
+    const allocator = arena.allocator();
 
     const buffer = try std.fs.cwd().readFileAlloc(allocator, "input.txt", 1024 * 1024);
     defer allocator.free(buffer);
