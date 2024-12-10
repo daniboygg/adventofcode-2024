@@ -2,3 +2,4 @@
 zig
 *.o
 input.txt
+input_test.txt

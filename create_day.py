@@ -18,6 +18,7 @@ def main():
         f.write(content)
 
     (path / "input.txt").touch()
+    (path / "input_test.txt").touch()
 
 
 if __name__ == '__main__':
