@@ -8,7 +8,7 @@ def main(make_tests):
 
         result = first(data)
         assert result == 1, f"Expected 1, actual {result}"
-        result = first(data)
+        result = second(data)
         assert result == 1, f"Expected 1, actual {result}"
 
     with open("input.txt", "r") as f:
