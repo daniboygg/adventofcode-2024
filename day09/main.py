@@ -1,4 +1,3 @@
-import collections
 import sys
 
 
@@ -128,7 +127,7 @@ def second(lines: list[str]):
             whole_size = wholes[i_whole]
             number_size = numbers[i_number]
             if whole_size >= number_size:
-                for j in range(i_number, i_number+number_size):
+                for j in range(i_number, i_number + number_size):
                     disk_map[i_whole + j - i_number] = disk_map[j]
                     disk_map[j] = "."
 
