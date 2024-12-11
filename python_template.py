@@ -7,9 +7,11 @@ def main(make_tests):
             data = f.readlines()
 
         result = first(data)
-        assert result == 1, f"Expected 1, actual {result}"
+        expected = 1
+        assert expected == result, f"Result 1: Expected {expected}, actual {result}"
         result = second(data)
-        assert result == 1, f"Expected 1, actual {result}"
+        expected = 1
+        assert expected == result, f"Result 2: Expected {expected}, actual {result}"
 
     with open("input.txt", "r") as f:
         data = f.readlines()
