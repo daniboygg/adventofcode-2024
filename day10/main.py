@@ -10,9 +10,9 @@ def main(make_tests):
             data = f.readlines()
 
         result = first(data)
-        assert result == 36, f"Expected 36, actual {result}"
+        assert result == 36, f"Result 1: Expected 36, actual {result}"
         result = second(data)
-        assert result == 1, f"Expected 1, actual {result}"
+        assert result == 81, f"Result 2: Expected 81, actual {result}"
 
     with open("input.txt", "r") as f:
         data = f.readlines()
@@ -100,16 +100,11 @@ def second(lines: list[str]):
     return 0
 
 
-class Direction(NamedTuple):
-    pos: Pos
-    direction: Pos
-
-
 class Pos(NamedTuple):
     row: int
     col: int
 
-    def go_to_next_hiking_step(self, direction: Pos, grid, last) -> Pos | None:
+    def go_to_next_hiking_step(self, direction: Direction, grid, last) -> Pos | None:
         new_pos = self.add(direction, grid)
         if new_pos is None:
             return None
@@ -117,8 +112,8 @@ class Pos(NamedTuple):
             return None
         return new_pos
 
-    def add(self, direction: Pos, grid) -> Pos | None:
-        new_pos = Pos(self.row + direction.row, self.col + direction.col)
+    def add(self, direction: Direction, grid) -> Pos | None:
+        new_pos = Pos(self.row + direction.rows, self.col + direction.cols)
         if new_pos.row < 0 or new_pos.row > len(grid) - 1:
             return None
         if new_pos.col < 0 or new_pos.col > len(grid[new_pos.row]) - 1:
@@ -126,10 +121,15 @@ class Pos(NamedTuple):
         return new_pos
 
 
-UP = Pos(-1, 0)
-RIGHT = Pos(0, 1)
-DOWN = Pos(1, 0)
-LEFT = Pos(0, -1)
+class Direction(NamedTuple):
+    rows: int
+    cols: int
+
+
+UP = Direction(-1, 0)
+RIGHT = Direction(0, 1)
+DOWN = Direction(1, 0)
+LEFT = Direction(0, -1)
 
 if __name__ == '__main__':
     main(make_tests=len(sys.argv) > 1 and sys.argv[1] == "--tests")
